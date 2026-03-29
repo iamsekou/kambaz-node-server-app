@@ -16,10 +16,22 @@ const app = express();
 
 app.set("trust proxy", 1);
 
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://kambaz-next-js-coral.vercel.app",
+  "https://kambaz-next-ep82k487f-sekou-samassis-projects.vercel.app",
+];
+
 app.use(
   cors({
     credentials: true,
-    origin: process.env.CLIENT_URL || "http://localhost:3000",
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+      callback(new Error(`Not allowed by CORS: ${origin}`));
+    },
   })
 );
 
@@ -27,7 +39,6 @@ const sessionOptions = {
   secret: process.env.SESSION_SECRET || "kambaz",
   resave: false,
   saveUninitialized: false,
-  cookie: {},
 };
 
 if (process.env.SERVER_ENV !== "development") {
