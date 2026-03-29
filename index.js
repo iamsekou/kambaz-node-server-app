@@ -14,6 +14,11 @@ import PeopleRoutes from "./(kambaz)/people/routes.js";
 
 const app = express();
 
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  next();
+});
+
 app.set("trust proxy", 1);
 
 const allowedOrigins = [
