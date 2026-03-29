@@ -33,15 +33,10 @@ const sessionOptions = {
   secret: process.env.SESSION_SECRET || "kambaz",
   resave: false,
   saveUninitialized: false,
+  cookie: {
+    sameSite: "lax",   // 
+  },
 };
-
-if (process.env.SERVER_ENV !== "development") {
-  sessionOptions.cookie = {
-    sameSite: "none",
-    secure: true,
-  };
-}
-
 app.use(session(sessionOptions));
 app.use(express.json());
 
