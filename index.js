@@ -52,7 +52,7 @@ if (process.env.SERVER_ENV === "production") {
   sessionOptions.cookie = {
     sameSite: "none",
     secure: true,
-    domain: process.env.SERVER_URL, // e.g. kambaz-node-server-app-s70t.onrender.com
+    domain: process.env.SERVER_URL,
   };
 } else {
   sessionOptions.cookie = {
@@ -75,8 +75,3 @@ PeopleRoutes(app, db);
 app.listen(process.env.PORT || 4000, () => {
   console.log(`Server running on port ${process.env.PORT || 4000}`);
 });
-```
-
-And make sure your Render `SERVER_URL` env var is updated to the exact domain:
-```
-kambaz-node-server-app-s70t.onrender.com
