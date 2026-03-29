@@ -22,33 +22,10 @@ app.use((req, res, next) => {
 
 app.set("trust proxy", 1);
 
-const allowedOrigins = [
-  "http://localhost:3000",
-  "https://kambaz-next-js-coral.vercel.app",
-];
-
 app.use(
   cors({
     credentials: true,
-    origin: function (origin, callback) {
-      if (!origin) {
-        callback(null, true);
-        return;
-      }
-
-      const isAllowedExact = allowedOrigins.includes(origin);
-
-      const isAllowedVercelPreview =
-        origin.endsWith(".vercel.app") &&
-        origin.includes("sekou-samassis-projects");
-
-      if (isAllowedExact || isAllowedVercelPreview) {
-        callback(null, true);
-        return;
-      }
-
-      callback(new Error(`Not allowed by CORS: ${origin}`));
-    },
+    origin: true,
   })
 );
 
