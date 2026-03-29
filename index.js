@@ -14,18 +14,30 @@ import PeopleRoutes from "./(kambaz)/people/routes.js";
 
 const app = express();
 
+app.set("trust proxy", 1);
+
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.url}`);
   console.log("Origin:", req.headers.origin);
   next();
 });
 
-app.set("trust proxy", 1);
-
 app.use(
   cors({
     credentials: true,
-    origin: true,
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+
+      const allowed =
+        origin === "http://localhost:3000" ||
+        origin === "https://kambaz-next-js-coral.vercel.app" ||
+        (origin.endsWith(".vercel.app") &&
+          origin.includes("sekou-samassis-projects"));
+
+      if (allowed) return callback(null, true);
+
+      return callback(new Error(`Not allowed by CORS: ${origin}`));
+    },
   })
 );
 
@@ -33,10 +45,15 @@ const sessionOptions = {
   secret: process.env.SESSION_SECRET || "kambaz",
   resave: false,
   saveUninitialized: false,
-  cookie: {
-    sameSite: "lax",   // 
-  },
 };
+
+if (process.env.SERVER_ENV !== "development") {
+  sessionOptions.cookie = {
+    sameSite: "none",
+    secure: true,
+  };
+}
+
 app.use(session(sessionOptions));
 app.use(express.json());
 
