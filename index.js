@@ -16,21 +16,50 @@ const app = express();
 
 app.set("trust proxy", 1);
 
-app.use(
-  cors({
-    credentials: true,
-    origin: true,
-  })
-);
+const allowedOrigins = [
+  "http://localhost:3000",
+  process.env.CLIENT_URL,
+].filter(Boolean);
+
+const corsOptions = {
+  credentials: true,
+  origin: (origin, callback) => {
+    if (!origin) {
+      callback(null, true);
+      return;
+    }
+
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+      return;
+    }
+
+    callback(new Error(`Not allowed by CORS: ${origin}`));
+  },
+  methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept"],
+};
+
+app.use(cors(corsOptions));
+app.options(/.*/, cors(corsOptions));
 
 const sessionOptions = {
   secret: process.env.SESSION_SECRET || "kambaz",
   resave: false,
   saveUninitialized: false,
-  cookie: {
-    sameSite: "lax",
-  },
 };
+
+if (process.env.SERVER_ENV === "production") {
+  sessionOptions.proxy = true;
+  sessionOptions.cookie = {
+    sameSite: "none",
+    secure: true,
+  };
+} else {
+  sessionOptions.cookie = {
+    sameSite: "lax",
+  };
+}
 
 app.use(session(sessionOptions));
 app.use(express.json());
@@ -45,5 +74,5 @@ EnrollmentsRoutes(app, db);
 PeopleRoutes(app, db);
 
 app.listen(process.env.PORT || 4000, () => {
-  console.log("Server running on http://localhost:4000");
+  console.log(`Server running on port ${process.env.PORT || 4000}`);
 });
