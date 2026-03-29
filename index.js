@@ -22,24 +22,25 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(
-  cors({
-    credentials: true,
-    origin: (origin, callback) => {
-      if (!origin) return callback(null, true);
+const corsOptions = {
+  credentials: true,
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
 
-      const allowed =
-        origin === "http://localhost:3000" ||
-        origin === "https://kambaz-next-js-coral.vercel.app" ||
-        (origin.endsWith(".vercel.app") &&
-          origin.includes("sekou-samassis-projects"));
+    const allowed =
+      origin === "http://localhost:3000" ||
+      origin === "https://kambaz-next-js-coral.vercel.app" ||
+      (origin.endsWith(".vercel.app") &&
+        origin.includes("sekou-samassis-projects"));
 
-      if (allowed) return callback(null, true);
+    if (allowed) return callback(null, true);
 
-      return callback(new Error(`Not allowed by CORS: ${origin}`));
-    },
-  })
-);
+    return callback(new Error(`Not allowed by CORS: ${origin}`));
+  },
+};
+
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 
 const sessionOptions = {
   secret: process.env.SESSION_SECRET || "kambaz",
@@ -51,6 +52,10 @@ if (process.env.SERVER_ENV !== "development") {
   sessionOptions.cookie = {
     sameSite: "none",
     secure: true,
+  };
+} else {
+  sessionOptions.cookie = {
+    sameSite: "lax",
   };
 }
 
