@@ -28,7 +28,12 @@ const corsOptions = {
       callback(null, true);
       return;
     }
-    if (allowedOrigins.includes(origin)) {
+    // allow localhost and any vercel deployment of your project
+    if (
+      origin === "http://localhost:3000" ||
+      origin.endsWith(".vercel.app") ||
+      origin === process.env.CLIENT_URL
+    ) {
       callback(null, true);
       return;
     }
