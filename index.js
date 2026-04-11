@@ -1,7 +1,12 @@
 import "dotenv/config";
+import mongoose from "mongoose";
 import express from "express";
 import cors from "cors";
 import session from "express-session";
+const CONNECTION_STRING =
+  process.env.DATABASE_CONNECTION_STRING || "mongodb://127.0.0.1:27017/kambaz";
+mongoose.connect(CONNECTION_STRING);
+
 import Hello from "./hello.js";
 import Lab5 from "./lab5/index.js";
 import db from "./(kambaz)/database/index.js";

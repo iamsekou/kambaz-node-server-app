@@ -5,50 +5,49 @@ export default function PeopleRoutes(app, db) {
   const usersDao = UsersDao(db);
   const enrollmentsDao = EnrollmentsDao(db);
 
-  const findUsersForCourse = (req, res) => {
+  const findUsersForCourse = async (req, res) => {
     const { courseId } = req.params;
     const enrollments = enrollmentsDao.findEnrollmentsForCourse(courseId);
-    const users = enrollments
-      .map((enrollment) => usersDao.findUserById(enrollment.user))
-      .filter(Boolean);
+    const users = (
+      await Promise.all(
+        enrollments.map((enrollment) => usersDao.findUserById(enrollment.user))
+      )
+    ).filter(Boolean);
     res.json(users);
   };
 
-  const createUserForCourse = (req, res) => {
+  const createUserForCourse = async (req, res) => {
     const currentUser = req.session["currentUser"];
-    if (!currentUser || currentUser.role !== "FACULTY") {
-      res.sendStatus(403);
-      return;
-    }
-
+    if (!currentUser || currentUser.role !== "FACULTY") { res.sendStatus(403); return; }
     const { courseId } = req.params;
-    const newUser = usersDao.createUser(req.body);
+    const newUser = await usersDao.createUser({
+      ...req.body,
+      loginId: req.body.loginId || req.body.username,
+      section: req.body.section || "TBD",
+      lastActivity: req.body.lastActivity || new Date(),
+      totalActivity: req.body.totalActivity || "0:00:00",
+    });
     enrollmentsDao.enrollUserInCourse(newUser._id, courseId);
     res.json(newUser);
   };
 
-  const updateUser = (req, res) => {
+  const updateUser = async (req, res) => {
     const currentUser = req.session["currentUser"];
-    if (!currentUser || currentUser.role !== "FACULTY") {
-      res.sendStatus(403);
+    if (!currentUser || currentUser.role !== "FACULTY") { res.sendStatus(403); return; }
+    const { userId } = req.params;
+    const updatedUser = await usersDao.updateUser(userId, req.body);
+    if (!updatedUser) {
+      res.sendStatus(404);
       return;
     }
-
-    const { userId } = req.params;
-    const updates = req.body;
-    const updatedUser = usersDao.updateUser(userId, updates);
     res.json(updatedUser);
   };
 
-  const deleteUser = (req, res) => {
+  const deleteUser = async (req, res) => {
     const currentUser = req.session["currentUser"];
-    if (!currentUser || currentUser.role !== "FACULTY") {
-      res.sendStatus(403);
-      return;
-    }
-
+    if (!currentUser || currentUser.role !== "FACULTY") { res.sendStatus(403); return; }
     const { userId } = req.params;
-    usersDao.deleteUser(userId);
+    await usersDao.deleteUser(userId);
     db.enrollments = db.enrollments.filter((e) => e.user !== userId);
     res.send(userId);
   };

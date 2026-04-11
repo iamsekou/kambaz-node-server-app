@@ -18,6 +18,15 @@ const db = {
       email: "alice@example.com",
       role: "STUDENT",
     },
+    {
+      _id: "3",
+      username: "ada",
+      password: "123",
+      firstName: "Ada",
+      lastName: "Lovelace",
+      email: "ada@lovelace.com",
+      role: "ADMIN",
+    },
   ],
 
   courses: [
