@@ -78,16 +78,19 @@ if (isProduction) {
   sessionOptions.proxy = true;
   const store = MongoStore.create({
     mongoUrl: CONNECTION_STRING,
-    crypto: {
-      secret: process.env.SESSION_SECRET || "kambaz",
-    },
+    // DO NOT pass `crypto` here.
+    // connect-mongo v5 has a bug: when `crypto` is set with the default
+    // `stringify: true`, the `get` method double-parses session data —
+    // `decryptSession` already JSON.parses the plaintext, then `unserialize`
+    // (= JSON.parse) is called again on the already-parsed object, giving
+    // JSON.parse("[object Object]") → SyntaxError.  That error is caught and
+    // forwarded to express-session, which creates a fresh empty session on
+    // every request, making req.session.currentUser always null → 401.
+    // Storing sessions without encryption is fine for a class project.
   });
-  // connect-mongo v5 has a bug in its touch() method — it crashes with
+  // connect-mongo v5 also has a bug in touch() where it crashes with
   // "Cannot read properties of null (reading 'length')" when sessions have
-  // no cookie expiry field.  express-session calls store.touch() on every
-  // request, so this fires constantly.  Replace it with a safe no-op:
-  // sessions are still stored and retrieved; we just skip the TTL-extension
-  // write, which is fine because maxAge already controls expiry.
+  // no cookie expiry.  Replace with a safe no-op.
   store.touch = (_sid, _session, cb) => cb(null);
   store.on("error", (err) => console.error("MongoStore error:", err));
   sessionOptions.store = store;
