@@ -5,7 +5,14 @@ import cors from "cors";
 import session from "express-session";
 const CONNECTION_STRING =
   process.env.DATABASE_CONNECTION_STRING || "mongodb://127.0.0.1:27017/kambaz";
-mongoose.connect(CONNECTION_STRING);
+mongoose
+  .connect(CONNECTION_STRING)
+  .then(() => {
+    console.log("Connected to MongoDB");
+  })
+  .catch((error) => {
+    console.error("MongoDB connection failed, continuing with fallback data:", error.message);
+  });
 
 import Hello from "./hello.js";
 import Lab5 from "./lab5/index.js";
