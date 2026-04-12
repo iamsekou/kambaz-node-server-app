@@ -17,14 +17,17 @@ export default function UserRoutes(app, db) {
       lastName: req.body.lastName || "",
       loginId: req.body.loginId || req.body.username,
     });
-    req.session["currentUser"] = currentUser;
-    // Explicitly save the session before responding.
-    // With an async MongoDB store the auto-save races against the response —
-    // the very next request (e.g. fetchCourses) can arrive before the session
-    // document exists in MongoDB, making req.session.currentUser null → 401.
-    req.session.save((err) => {
-      if (err) { console.error("Session save error on signup:", err); }
-      res.json(currentUser);
+    // regenerate() destroys the current session and issues a brand-new session
+    // ID.  This overwrites any stale/duplicate connect.sid cookies the browser
+    // accumulated across redeployments, preventing the old encrypted-session
+    // cookie from shadowing the new valid one.
+    req.session.regenerate((err) => {
+      if (err) { console.error("Session regenerate error on signup:", err); res.status(500).json({ message: "Session error" }); return; }
+      req.session["currentUser"] = currentUser;
+      req.session.save((err) => {
+        if (err) { console.error("Session save error on signup:", err); }
+        res.json(currentUser);
+      });
     });
   };
 
@@ -35,11 +38,15 @@ export default function UserRoutes(app, db) {
       res.status(401).json({ message: "Unable to login. Try again later." });
       return;
     }
-    req.session["currentUser"] = currentUser;
-    // Same race-condition fix as signup — flush to MongoDB before responding.
-    req.session.save((err) => {
-      if (err) { console.error("Session save error on signin:", err); }
-      res.json(currentUser);
+    // Same regenerate pattern — guarantees a single fresh session cookie on
+    // every login regardless of what stale cookies the browser is carrying.
+    req.session.regenerate((err) => {
+      if (err) { console.error("Session regenerate error on signin:", err); res.status(500).json({ message: "Session error" }); return; }
+      req.session["currentUser"] = currentUser;
+      req.session.save((err) => {
+        if (err) { console.error("Session save error on signin:", err); }
+        res.json(currentUser);
+      });
     });
   };
 
