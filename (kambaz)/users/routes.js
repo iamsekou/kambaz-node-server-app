@@ -18,18 +18,29 @@ export default function UserRoutes(app, db) {
       loginId: req.body.loginId || req.body.username,
     });
     req.session["currentUser"] = currentUser;
-    res.json(currentUser);
+    // Explicitly save the session before responding.
+    // With an async MongoDB store the auto-save races against the response —
+    // the very next request (e.g. fetchCourses) can arrive before the session
+    // document exists in MongoDB, making req.session.currentUser null → 401.
+    req.session.save((err) => {
+      if (err) { console.error("Session save error on signup:", err); }
+      res.json(currentUser);
+    });
   };
 
   const signin = async (req, res) => {
     const { username, password } = req.body;
     const currentUser = await dao.findUserByCredentials(username, password);
-    if (currentUser) {
-      req.session["currentUser"] = currentUser;
-      res.json(currentUser);
-    } else {
+    if (!currentUser) {
       res.status(401).json({ message: "Unable to login. Try again later." });
+      return;
     }
+    req.session["currentUser"] = currentUser;
+    // Same race-condition fix as signup — flush to MongoDB before responding.
+    req.session.save((err) => {
+      if (err) { console.error("Session save error on signin:", err); }
+      res.json(currentUser);
+    });
   };
 
   const profile = (req, res) => {

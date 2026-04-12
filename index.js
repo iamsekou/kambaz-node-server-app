@@ -59,13 +59,22 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.options(/.*/, cors(corsOptions));
 
+// Render automatically injects RENDER=true into every deployment.
+// Fall back to SERVER_ENV=production for local production-mode testing.
+const isProduction = process.env.RENDER === "true" ||
+                     process.env.SERVER_ENV === "production";
+
+console.log(`Session mode: ${isProduction
+  ? "PRODUCTION — MongoDB store, sameSite=none, secure=true"
+  : "DEVELOPMENT — memory store, sameSite=lax"}`);
+
 const sessionOptions = {
   secret: process.env.SESSION_SECRET || "kambaz",
   resave: false,
   saveUninitialized: false,
 };
 
-if (process.env.SERVER_ENV === "production") {
+if (isProduction) {
   sessionOptions.proxy = true;
   const store = MongoStore.create({
     mongoUrl: CONNECTION_STRING,
@@ -73,25 +82,26 @@ if (process.env.SERVER_ENV === "production") {
       secret: process.env.SESSION_SECRET || "kambaz",
     },
   });
-  // connect-mongo v5 has a bug in its touch() method: when a session has no
-  // cookie expiry data, touch() crashes with "Cannot read properties of null
-  // (reading 'length')".  express-session calls store.touch() on every
-  // request, so this crash fires constantly.  Override touch with a safe
-  // no-op — sessions are still stored/retrieved correctly; we just skip the
-  // expiry-extension step, which is fine because our cookies are session
-  // cookies (no maxAge) that expire when the browser closes anyway.
-  store.touch = (_sid, _session, callback) => callback(null);
-  store.on("error", (err) => {
-    console.error("MongoStore session error:", err);
-  });
+  // connect-mongo v5 has a bug in its touch() method — it crashes with
+  // "Cannot read properties of null (reading 'length')" when sessions have
+  // no cookie expiry field.  express-session calls store.touch() on every
+  // request, so this fires constantly.  Replace it with a safe no-op:
+  // sessions are still stored and retrieved; we just skip the TTL-extension
+  // write, which is fine because maxAge already controls expiry.
+  store.touch = (_sid, _session, cb) => cb(null);
+  store.on("error", (err) => console.error("MongoStore error:", err));
   sessionOptions.store = store;
   sessionOptions.cookie = {
     sameSite: "none",
     secure: true,
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours — survives Render cold-starts
   };
 } else {
   sessionOptions.cookie = {
     sameSite: "lax",
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000,
   };
 }
 
