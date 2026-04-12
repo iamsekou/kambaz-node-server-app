@@ -67,13 +67,19 @@ const sessionOptions = {
 
 if (process.env.SERVER_ENV === "production") {
   sessionOptions.proxy = true;
-  sessionOptions.store = MongoStore.create({
+  const store = MongoStore.create({
     mongoUrl: CONNECTION_STRING,
-    touchAfter: 24 * 3600,
+    // NOTE: do NOT set touchAfter — it triggers a bug in connect-mongo v5
+    // where the periodic touch callback crashes with "Cannot read properties
+    // of null (reading 'length')" when sessions have no cookie expiry data.
     crypto: {
       secret: process.env.SESSION_SECRET || "kambaz",
     },
   });
+  store.on("error", (err) => {
+    console.error("MongoStore session error:", err);
+  });
+  sessionOptions.store = store;
   sessionOptions.cookie = {
     sameSite: "none",
     secure: true,
