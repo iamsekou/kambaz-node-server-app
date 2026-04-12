@@ -69,13 +69,18 @@ if (process.env.SERVER_ENV === "production") {
   sessionOptions.proxy = true;
   const store = MongoStore.create({
     mongoUrl: CONNECTION_STRING,
-    // NOTE: do NOT set touchAfter — it triggers a bug in connect-mongo v5
-    // where the periodic touch callback crashes with "Cannot read properties
-    // of null (reading 'length')" when sessions have no cookie expiry data.
     crypto: {
       secret: process.env.SESSION_SECRET || "kambaz",
     },
   });
+  // connect-mongo v5 has a bug in its touch() method: when a session has no
+  // cookie expiry data, touch() crashes with "Cannot read properties of null
+  // (reading 'length')".  express-session calls store.touch() on every
+  // request, so this crash fires constantly.  Override touch with a safe
+  // no-op — sessions are still stored/retrieved correctly; we just skip the
+  // expiry-extension step, which is fine because our cookies are session
+  // cookies (no maxAge) that expire when the browser closes anyway.
+  store.touch = (_sid, _session, callback) => callback(null);
   store.on("error", (err) => {
     console.error("MongoStore session error:", err);
   });
