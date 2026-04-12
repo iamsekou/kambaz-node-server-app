@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import express from "express";
 import cors from "cors";
 import session from "express-session";
+import MongoStore from "connect-mongo";
 const CONNECTION_STRING =
   process.env.DATABASE_CONNECTION_STRING || "mongodb://127.0.0.1:27017/kambaz";
 mongoose
@@ -66,6 +67,13 @@ const sessionOptions = {
 
 if (process.env.SERVER_ENV === "production") {
   sessionOptions.proxy = true;
+  sessionOptions.store = MongoStore.create({
+    mongoUrl: CONNECTION_STRING,
+    touchAfter: 24 * 3600,
+    crypto: {
+      secret: process.env.SESSION_SECRET || "kambaz",
+    },
+  });
   sessionOptions.cookie = {
     sameSite: "none",
     secure: true,
