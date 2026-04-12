@@ -53,6 +53,7 @@ export default function CourseRoutes(app, db) {
     let { uid, cid } = req.params;
     if (uid === "current") {
       const currentUser = req.session["currentUser"];
+      if (!currentUser) { res.sendStatus(401); return; }
       uid = currentUser._id;
     }
     const status = await enrollmentsDao.enrollUserInCourse(uid, cid);
@@ -63,6 +64,7 @@ export default function CourseRoutes(app, db) {
     let { uid, cid } = req.params;
     if (uid === "current") {
       const currentUser = req.session["currentUser"];
+      if (!currentUser) { res.sendStatus(401); return; }
       uid = currentUser._id;
     }
     const status = await enrollmentsDao.unenrollUserFromCourse(uid, cid);
