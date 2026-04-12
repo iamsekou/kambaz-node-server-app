@@ -1,44 +1,36 @@
 import { v4 as uuidv4 } from "uuid";
+import model from "./model.js";
 
 export default function CoursesDao(db) {
-  function findAllCourses() {
-    return db.courses;
-  }
+  const findAllCourses = () =>
+    model.find({}, { name: 1, description: 1, number: 1, startDate: 1, endDate: 1, department: 1, credits: 1 });
 
-  function findCoursesForEnrolledUser(userId) {
-    const { courses, enrollments } = db;
-    return courses.filter((course) =>
-      enrollments.some(
-        (enrollment) =>
-          enrollment.user === userId && enrollment.course === course._id
-      )
+  const findCourseById = (courseId) => model.findById(courseId);
+
+  const findCoursesForEnrolledUser = async (userId) => {
+    const { enrollments } = db;
+    const enrolledCourseIds = enrollments
+      .filter((e) => e.user === userId)
+      .map((e) => e.course);
+    return model.find(
+      { _id: { $in: enrolledCourseIds } },
+      { name: 1, description: 1, number: 1, startDate: 1, endDate: 1, department: 1, credits: 1 }
     );
-  }
+  };
 
-  function createCourse(course) {
+  const createCourse = (course) => {
     const newCourse = { ...course, _id: uuidv4() };
-    db.courses = [...db.courses, newCourse];
-    return newCourse;
-  }
+    return model.create(newCourse);
+  };
 
-  function deleteCourse(courseId) {
-    const { courses, enrollments } = db;
-    db.courses = courses.filter((course) => course._id !== courseId);
-    db.enrollments = enrollments.filter(
-      (enrollment) => enrollment.course !== courseId
-    );
-    return courseId;
-  }
+  const deleteCourse = (courseId) => model.deleteOne({ _id: courseId });
 
-  function updateCourse(courseId, courseUpdates) {
-    const { courses } = db;
-    const course = courses.find((course) => course._id === courseId);
-    Object.assign(course, courseUpdates);
-    return course;
-  }
+  const updateCourse = (courseId, courseUpdates) =>
+    model.updateOne({ _id: courseId }, { $set: courseUpdates });
 
   return {
     findAllCourses,
+    findCourseById,
     findCoursesForEnrolledUser,
     createCourse,
     deleteCourse,
