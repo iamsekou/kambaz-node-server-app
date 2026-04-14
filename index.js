@@ -30,6 +30,14 @@ import AssignmentsRoutes from "./(kambaz)/assignments/routes.js";
 import EnrollmentsRoutes from "./(kambaz)/enrollments/routes.js";
 import PeopleRoutes from "./(kambaz)/people/routes.js";
 
+// import the three new quiz-related route files
+// quizzes = the quiz itself (title, dates, settings, publish toggle)
+// questions = individual questions that belong to a quiz
+// attempts = student submissions and scoring
+import QuizzesRoutes from "./(kambaz)/quizzes/routes.js";
+import QuestionsRoutes from "./(kambaz)/questions/routes.js";
+import AttemptsRoutes from "./(kambaz)/attempts/routes.js";
+
 const app = express();
 
 app.set("trust proxy", 1);
@@ -114,6 +122,13 @@ ModulesRoutes(app, db);
 AssignmentsRoutes(app, db);
 EnrollmentsRoutes(app, db);
 PeopleRoutes(app, db);
+
+// wire in the quiz-related routes.
+// these don't need the in-memory db object because they use mongoose models directly,
+// the same way the quiz dao files are already set up.
+QuizzesRoutes(app);
+QuestionsRoutes(app);
+AttemptsRoutes(app);
 
 app.listen(process.env.PORT || 4000, () => {
   console.log(`Server running on port ${process.env.PORT || 4000}`);

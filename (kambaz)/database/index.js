@@ -97,6 +97,171 @@ const db = {
     },
   ],
 
+  // ── quizzes ──────────────────────────────────────────────────────────────
+  // these are sample quizzes tied to the RS101 and RS102 courses above.
+  // quizzes that are published=true will be visible to students right away.
+  quizzes: [
+    {
+      _id: "QZ101",
+      title: "Rocket Propulsion Basics",
+      course: "RS101",
+      description: "covers the fundamental principles of rocket propulsion.",
+      quizType: "GRADED_QUIZ",
+      points: 10, // this gets recalculated when questions are saved via the api
+      assignmentGroup: "QUIZZES",
+      shuffleAnswers: true,
+      timeLimit: 20,
+      multipleAttempts: false,
+      howManyAttempts: 1,
+      showCorrectAnswers: "immediately",
+      accessCode: "",
+      oneQuestionAtATime: true,
+      webcamRequired: false,
+      lockQuestionsAfterAnswering: false,
+      dueDate: "2026-05-15T23:59",
+      availableDate: "2026-05-01T00:00",
+      untilDate: "2026-05-15T23:59",
+      published: true,
+    },
+    {
+      _id: "QZ102",
+      title: "Aerodynamics Mid-Term",
+      course: "RS102",
+      description: "covers lift, drag, and bernoulli's principle.",
+      quizType: "GRADED_QUIZ",
+      points: 15,
+      assignmentGroup: "EXAMS",
+      shuffleAnswers: false,
+      timeLimit: 30,
+      multipleAttempts: true,
+      howManyAttempts: 2,
+      showCorrectAnswers: "immediately",
+      accessCode: "",
+      oneQuestionAtATime: false,
+      webcamRequired: false,
+      lockQuestionsAfterAnswering: false,
+      dueDate: "2026-05-20T23:59",
+      availableDate: "2026-05-10T00:00",
+      untilDate: "2026-05-20T23:59",
+      published: true,
+    },
+    {
+      _id: "QZ103",
+      title: "Engine Systems Draft",
+      course: "RS101",
+      description: "draft quiz - not published yet so students can't see it.",
+      quizType: "PRACTICE_QUIZ",
+      points: 5,
+      assignmentGroup: "QUIZZES",
+      shuffleAnswers: true,
+      timeLimit: 10,
+      multipleAttempts: false,
+      howManyAttempts: 1,
+      showCorrectAnswers: "immediately",
+      accessCode: "",
+      oneQuestionAtATime: true,
+      webcamRequired: false,
+      lockQuestionsAfterAnswering: false,
+      dueDate: "2026-06-01T23:59",
+      availableDate: "2026-05-25T00:00",
+      untilDate: "2026-06-01T23:59",
+      published: false, // hidden from students until faculty publishes it
+    },
+  ],
+
+  // ── questions ─────────────────────────────────────────────────────────────
+  // sample questions for QZ101. each one points back to its quiz via the quiz field.
+  questions: [
+    {
+      _id: "QN101",
+      quiz: "QZ101",
+      title: "Newton's Third Law",
+      type: "TRUE_FALSE",
+      points: 2,
+      question:
+        "Newton's third law states that every action has an equal and opposite reaction.",
+      choices: [],
+      correctAnswer: "true", // the correct answer for this true/false question
+      correctAnswers: [],
+    },
+    {
+      _id: "QN102",
+      quiz: "QZ101",
+      title: "Specific Impulse Units",
+      type: "MULTIPLE_CHOICE",
+      points: 4,
+      question: "what is the unit of specific impulse (Isp)?",
+      choices: [
+        { text: "Newtons", isCorrect: false },
+        { text: "Seconds", isCorrect: true }, // this is the right answer
+        { text: "Kilograms", isCorrect: false },
+        { text: "Meters per second", isCorrect: false },
+      ],
+      correctAnswer: "",
+      correctAnswers: [],
+    },
+    {
+      _id: "QN103",
+      quiz: "QZ101",
+      title: "Exhaust Velocity",
+      type: "FILL_IN_BLANK",
+      points: 4,
+      question:
+        "the velocity at which exhaust gases exit the nozzle is called _______ velocity.",
+      choices: [],
+      correctAnswer: "",
+      // any of these answers (case-insensitive) counts as correct
+      correctAnswers: ["exhaust", "exit", "effective exhaust"],
+    },
+    {
+      _id: "QN104",
+      quiz: "QZ102",
+      title: "Bernoulli's Principle",
+      type: "TRUE_FALSE",
+      points: 5,
+      question:
+        "bernoulli's principle states that as fluid speed increases, pressure decreases.",
+      choices: [],
+      correctAnswer: "true",
+      correctAnswers: [],
+    },
+    {
+      _id: "QN105",
+      quiz: "QZ102",
+      title: "Lift Generation",
+      type: "MULTIPLE_CHOICE",
+      points: 10,
+      question: "which shape of wing cross-section generates the most lift?",
+      choices: [
+        { text: "Flat plate", isCorrect: false },
+        { text: "Symmetric airfoil", isCorrect: false },
+        { text: "Cambered airfoil", isCorrect: true }, // correct answer
+        { text: "Rectangular block", isCorrect: false },
+      ],
+      correctAnswer: "",
+      correctAnswers: [],
+    },
+  ],
+
+  // ── attempts ──────────────────────────────────────────────────────────────
+  // sample attempt showing what it looks like after student "alice" (user _id "2")
+  // submits QZ101. this is here so maryam has something to test the results screen with.
+  attempts: [
+    {
+      _id: "AT101",
+      quiz: "QZ101",
+      student: "2", // alice's user id
+      answers: [
+        { questionId: "QN101", answer: "true", correct: true, pointsEarned: 2 },
+        { questionId: "QN102", answer: "Seconds", correct: true, pointsEarned: 4 },
+        { questionId: "QN103", answer: "exhaust", correct: true, pointsEarned: 4 },
+      ],
+      score: 10,
+      attemptNumber: 1,
+      submittedAt: new Date("2026-05-02T14:30:00"),
+    },
+  ],
+
   assignments: [
     {
       _id: "A101",
