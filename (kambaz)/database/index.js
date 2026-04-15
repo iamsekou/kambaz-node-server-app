@@ -169,7 +169,7 @@ const db = {
     },
   ],
 
-  // ── questions ─────────────────────────────────────────────────────────────
+  //questions 
   // sample questions for QZ101. each one points back to its quiz via the quiz field.
   questions: [
     {
@@ -243,9 +243,8 @@ const db = {
     },
   ],
 
-  // ── attempts ──────────────────────────────────────────────────────────────
-  // sample attempt showing what it looks like after student "alice" (user _id "2")
-  // submits QZ101. this is here so maryam has something to test the results screen with.
+  // sample attempt with alice 
+  
   attempts: [
     {
       _id: "AT101",
