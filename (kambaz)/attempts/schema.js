@@ -8,12 +8,14 @@ const attemptSchema = new mongoose.Schema(
     _id: String,
 
     // which quiz this attempt is for
-    quiz: { type: String, ref: "QuizModel" },
+    quiz: 
+    
+    { type: String, ref: "QuizModel" },
 
     // which student submitted this attempt (the user's _id)
     student: { type: String, ref: "UserModel" },
 
-    // the student's answers - one entry per question.
+    // the student's answers one entry per question.
     // each entry links the question id to what the student answered.
     // for multiple choice: answer is the text of the choice they picked
     // for true/false: answer is "true" or "false"
@@ -31,10 +33,14 @@ const attemptSchema = new mongoose.Schema(
 
     // which attempt number this is for this student on this quiz
     // (1st try = 1, 2nd try = 2, etc.)
-    attemptNumber: { type: Number, default: 1 },
+    attemptNumber: 
+    
+    { type: Number, default: 1 },
 
     // when the student actually hit submit
-    submittedAt: { type: Date, default: Date.now },
+    submittedAt: 
+    
+    { type: Date, default: Date.now },
   },
   { collection: "attempts" }
 );

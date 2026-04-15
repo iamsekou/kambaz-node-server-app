@@ -78,7 +78,6 @@ export default function QuizzesRoutes(app) {
     res.json(newQuiz);
   };
 
-  // DELETE /api/quizzes/:quizId
   // deletes a quiz. faculty only.
   const deleteQuiz = async (req, res) => {
     if (!requireFaculty(req, res)) return;
@@ -88,7 +87,6 @@ export default function QuizzesRoutes(app) {
     res.json(status);
   };
 
-  // PUT /api/quizzes/:quizId
   // updates a quiz's fields. faculty only.
   const updateQuiz = async (req, res) => {
     if (!requireFaculty(req, res)) return;
@@ -99,7 +97,6 @@ export default function QuizzesRoutes(app) {
     res.json(status);
   };
 
-  // PUT /api/quizzes/:quizId/publish
   // toggles a quiz between published and unpublished. faculty only.
   // expects body: { published: true } or { published: false }
   const publishQuiz = async (req, res) => {
