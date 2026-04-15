@@ -17,7 +17,6 @@ export default function AttemptsRoutes(app) {
     return currentUser;
   };
 
-  // GET /api/quizzes/:quizId/attempts
   // faculty: returns all attempts by all students for a quiz
   // students: returns only their own attempts
   const getAttempts = async (req, res) => {
@@ -40,7 +39,6 @@ export default function AttemptsRoutes(app) {
     res.json(mine);
   };
 
-  // GET /api/quizzes/:quizId/attempts/last
   // returns the most recent attempt by the current student on this quiz.
   // the front end uses this to show the student their last score and answers.
   const getLastAttempt = async (req, res) => {
@@ -116,7 +114,7 @@ export default function AttemptsRoutes(app) {
           submitted.answer?.trim().toLowerCase() ===
             correctChoice.text?.trim().toLowerCase();
       } else if (question.type === "TRUE_FALSE") {
-        // stored as "true" or "false" string - just compare directly
+        // stored as "true" or "false" string
         correct =
           submitted.answer?.trim().toLowerCase() ===
           question.correctAnswer?.trim().toLowerCase();
